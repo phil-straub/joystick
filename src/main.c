@@ -3,15 +3,15 @@
 #include <inttypes.h>
 #include <stdatomic.h>
 
-#include <signal_handler.h>
+#include <posigs.h>
 
 #include "js.h"
 
 static const char js_std_pathname[] = "/dev/input/js0";
 
-static atomic_bool running = true;
+static atomic_bool is_running = true;
 
-static void sigint_action(int signum, void * arg) {if (signum == SIGINT) running = false;}
+static void sigint_action(int signum, void * arg) {if (signum == SIGINT) is_running = false;}
 
 int main(int argc, char * argv[])
 {
@@ -32,12 +32,12 @@ int main(int argc, char * argv[])
 
     sigset_t sig_set;
     sigemptyset(&sig_set);
-    SignalHandler signal_handler = {
+    PosigsHandler signal_handler = {
         .sig_set = &sig_set,
         .sig_action = sigint_action,
         .timeout = (struct timespec){.tv_nsec = 10'000'000}
     };
-    if (!((sigaddset(&sig_set, SIGINT) == 0) && create_signal_handler(&signal_handler))) {
+    if (!((sigaddset(&sig_set, SIGINT) == 0) && posigs_create_handler(&signal_handler))) {
         fprintf(stderr, "Error: Unable to install signal handler!\n");
         goto create_signal_handler_error;
     }
@@ -77,16 +77,21 @@ int main(int argc, char * argv[])
      * Main Loop
      */
 
-    while (running) {
-        printf("\033[2J");
-        printf("\033[1;1H");
+    /* save current cursor state */
+    printf("\n\033[s");
 
+    while (is_running) {
+        /* return cursor to initial position and clear screen */ 
+        printf("\033[u\033[0J");
+
+        /* obtain current joystick state */
         JsState state;
         if (js_query_async_state(&async_state, &state) != JsResult_success) {
             fprintf(stderr, "Error: Unable to obtain joystick state!\n");
             goto query_async_state_error;
         }
 
+        /* print state */
         printf("Buttons: ");
         for (unsigned int i=0; i<js_max_number_of_buttons; ++i) {
             printf("%u ", (state.buttons & (1 << i)) ? 1 : 0);
@@ -94,14 +99,15 @@ int main(int argc, char * argv[])
                 printf(" ");
             }
         }
-        printf("\nAxes: ");
+        printf("\nAxes   : ");
         for (unsigned int i=0; i<js_max_number_of_axes; ++i) {
-            printf("  %7"PRIi16, state.axes[i]);
+            printf("%-7"PRIi16"  ", state.axes[i]);
         }
         printf("\n");
 
         fflush(stdout);
 
+        /* sleep */
         thrd_sleep(&(struct timespec){.tv_nsec = 10'000'000}, nullptr);
     }
 
@@ -111,12 +117,14 @@ int main(int argc, char * argv[])
 
     js_destroy_async_state(&async_state);
     js_disconnect(js);
-    destroy_signal_handler(&signal_handler);
+    posigs_destroy_handler(&signal_handler);
 
     return EXIT_SUCCESS;
 
     /*
      * Error Handling
+     *
+     * (This is not really necessary, since the program terminates anyway.)
      */
 
     query_async_state_error:
@@ -130,7 +138,7 @@ int main(int argc, char * argv[])
     }
     connect_error:
     {
-        destroy_signal_handler(&signal_handler);
+        posigs_destroy_handler(&signal_handler);
     }
     create_signal_handler_error:
     return EXIT_FAILURE;

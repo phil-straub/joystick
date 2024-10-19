@@ -3,7 +3,6 @@
 #include <threads.h>
 #include <inttypes.h>
 #include <errno.h>
-//#include <string.h>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -13,8 +12,8 @@
 #include "js.h"
 
 /****************************************************************************************************
+ *
  * Serial Interface for Reading Individual Events
- * ==============================================
  *
  ***************************************************************************************************/
 
@@ -55,14 +54,14 @@ void js_display_event(const JsEvent * event)
 {
     printf(event->type & JS_EVENT_BUTTON ? "button" : "axis  ");
     printf(" [%.2"PRIu8"] -> %6"PRIi16, event->number, event->value);
-    printf(" at time %fs", ((float) event->time) / 1000.0f);
+    printf(" at time %fs", ((float) event->time) / 1000.0f); /* convert time from ms to s */
 
     printf("\n");
 }
 
 /****************************************************************************************************
+ *
  * Query Joystick Properties
- * =========================
  *
  ***************************************************************************************************/
 
@@ -87,12 +86,13 @@ void js_display_properties(const JsProperties * properties)
 }
 
 /****************************************************************************************************
+ *
  * Asynchronous Event Handler
- * ==========================
  *
  ***************************************************************************************************/
 
-// TODO make timeout time a constant
+static const struct timespec js_timeout = {.tv_nsec = 100000};
+
 static int js_event_handler_main(void * arg)
 {
     JsEventHandler * const event_handler = (JsEventHandler*) arg;
@@ -106,7 +106,7 @@ static int js_event_handler_main(void * arg)
                 break;
             /* no event -> continue with loop */
             case JsResult_nothing:
-                thrd_sleep(&(struct timespec){.tv_nsec = 100000}, nullptr);
+                thrd_sleep(&js_timeout, nullptr);
                 continue;
             /* error */
             default:
@@ -168,8 +168,8 @@ bool js_event_handler_is_running(const JsEventHandler * event_handler)
 }
 
 /****************************************************************************************************
- * JsState
- * =======
+ *
+ * Joystick State
  *
  ***************************************************************************************************/
 
@@ -203,8 +203,8 @@ JsResult js_update_state(JsState * state, const JsEvent * event)
 }
 
 /****************************************************************************************************
+ *
  * Asynchronously Updated State
- * ============================
  *
  ***************************************************************************************************/
 
@@ -261,7 +261,6 @@ JsResult js_create_async_state(int js, JsAsyncState * async_state)
         return JsResult_failure;
     }
 
-    /* success */
     return JsResult_success;
 }
 
