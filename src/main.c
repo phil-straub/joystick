@@ -7,7 +7,7 @@
 
 #include "js.h"
 
-constexpr char js_std_pathname[] = "/dev/input/js0";
+static const char js_std_pathname[] = "/dev/input/js0";
 
 static atomic_bool running = true;
 

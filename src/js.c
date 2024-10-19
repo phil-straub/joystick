@@ -3,7 +3,7 @@
 #include <threads.h>
 #include <inttypes.h>
 #include <errno.h>
-#include <string.h>
+//#include <string.h>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -92,6 +92,7 @@ void js_display_properties(const JsProperties * properties)
  *
  ***************************************************************************************************/
 
+// TODO make timeout time a constant
 static int js_event_handler_main(void * arg)
 {
     JsEventHandler * const event_handler = (JsEventHandler*) arg;
