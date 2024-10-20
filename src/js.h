@@ -23,7 +23,7 @@ typedef enum {
 
 typedef struct js_event JsEvent;
 
-int js_connect(const char * pathname);
+int js_connect(const char * path);
 void js_disconnect(int js);
 
 JsResult js_get_event(int js, JsEvent * event);

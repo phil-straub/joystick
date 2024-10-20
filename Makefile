@@ -1,6 +1,6 @@
 # Compiler ##########################################################################################
 
-cc ::= clang
+cc ::= gcc 
 
 # compiler flags shared between debug and release build
 # (generate position independent code, use GNU/C23 standard, compile to object file without linking)
@@ -25,8 +25,10 @@ LD ::= $(ld)
 
 # External Dependencies (only required by the demo) #################################################
 
-POSIGS_INCLUDE_PATH ::= ../posigs/src
-POSIGS_BUILD_PATH ::= ../posigs/build
+POSIGS_PATH ::= ../posigs
+
+POSIGS_INCLUDE_PATH ::= $(POSIGS_PATH)/src
+POSIGS_BUILD_PATH ::= $(POSIGS_PATH)/build
 
 POSIGS_HEADER ::= $(POSIGS_INCLUDE_PATH)/posigs.h
 POSIGS_OBJ ::= $(POSIGS_BUILD_PATH)/posigs.o

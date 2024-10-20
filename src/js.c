@@ -17,9 +17,9 @@
  *
  ***************************************************************************************************/
 
-int js_connect(const char * pathname)
+int js_connect(const char * path)
 {
-    return open(pathname, O_RDONLY | O_NONBLOCK);
+    return open(path, O_RDONLY | O_NONBLOCK);
 }
 
 void js_disconnect(int js)
