@@ -157,7 +157,7 @@ as possible to avoid overflowing the event queue provided by the kernel. If this
 issue, the cleanest solution is to implement a secondard, dynamically growing queue and have the
 callback function transfer each event to the secondary queue for asynchronous handling by another
 thread. For most purposes (games, remotely controlled devices) events should be handled in real time
-anyway, however. One possibility is to ignore all incomming events (but retrieve them from the queue)
+anyway, however. One possibility is to ignore all incoming events (but retrieve them from the queue)
 while an event is being handled by another thread.
 
 ### State-Based Interface
@@ -214,7 +214,7 @@ any issues.
 to only initialize ROS _after_ js is fully initialized. Why this is the case is unclear.
 + So far, the library has only been tested with the Logitech Gamepad F710. There is a separate
 header file `src/f710.h` providing mappings between button/axis names to indices for this particular device.
-+ Comparable functionality to js is provided by [GLFW](glfw.org).
++ Comparable functionality to js is provided by [GLFW](https://glfw.org).
 The latter is really meant to be used with graphics libraries like OpenGL and Vulkan and
 may only work reliably when a monitor is connected.
 
